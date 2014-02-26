@@ -65,6 +65,40 @@ class Issue extends AppModel {
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
+		'status' => array(
+			'valid' => array(
+				'rule' => array(
+					'inList' => array(
+						'open', 
+						'confirmed',
+						'assigned',
+						'closed'
+					)
+				)
+			)
+		),
+		'solution' => array(
+			'valid' => array(
+				'rule' => array(
+					'inList' => array(
+						'resolved',
+						'wontfix',
+						'cantfix'
+					)
+				)
+			)
+		)
+		'type' => array(
+			'valid' => array(
+				'rule' => array(
+					'inList' => array(
+						'bug',
+						'enhancement',
+						'feature-request'
+					)
+				)
+			)
+		)
 	);
 
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
