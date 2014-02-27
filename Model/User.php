@@ -8,6 +8,10 @@ App::uses('SimplePasswordHasher', 'Controller/Component/Auth');
  */
 class User extends AppModel {
 
+	public $actsAs = array(
+		'Containable'
+	);
+
 	public $displayField = 'email';
 
 /**
@@ -54,6 +58,13 @@ class User extends AppModel {
 			'className' => 'Issue',
 			'foreignKey' => 'user_id',
 			'dependent' => false,
+		)
+	);
+
+	public $hasAndBelongsToMany = array(
+		'Project',
+		'AssignedIssue' => array(
+			'className' => 'Issue'
 		)
 	);
 

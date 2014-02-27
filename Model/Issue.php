@@ -9,6 +9,10 @@ App::uses('AppModel', 'Model');
  */
 class Issue extends AppModel {
 
+	public $actsAs = array(
+		'Containable'
+	);
+
 /**
  * Validation rules
  *
@@ -87,7 +91,7 @@ class Issue extends AppModel {
 					)
 				)
 			)
-		)
+		),
 		'type' => array(
 			'valid' => array(
 				'rule' => array(
@@ -138,7 +142,7 @@ class Issue extends AppModel {
 		)
 	);
 
-	function beforeSave(){
+	function beforeSave () {
 
 		if (!isset($this->data['User']['user_id'])){
 			// Try to find the user by email

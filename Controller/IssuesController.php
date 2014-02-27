@@ -33,10 +33,14 @@ class IssuesController extends AppController {
  * @return void
  */
 	public function view($id = null) {
+		$this->Issue->recursive = -1;
 		if (!$this->Issue->exists($id)) {
 			throw new NotFoundException(__('Invalid issue'));
 		}
-		$options = array('conditions' => array('Issue.' . $this->Issue->primaryKey => $id));
+		$options = array(
+			'conditions' => array('Issue.' . $this->Issue->primaryKey => $id),
+			'contain' => array('Project', 'User', 'ModifiedUser', 'Agent')
+		);
 		$this->set('issue', $this->Issue->find('first', $options));
 	}
 
@@ -84,10 +88,37 @@ class IssuesController extends AppController {
 			$this->request->data = $this->Issue->find('first', $options);
 		}
 		$users = $this->Issue->User->find('list');
-		$agents = $this->Issue->User->find('list', array('conditions' => array('User.role' => 'agent')));
+
+		$this->Issue->Project->recursive = -1;
+		$project = $this->Issue->Project->find('first', array(
+			'conditions' => array('Project.id' => $this->request->data['Issue']['project_id']),
+			'contain' => array('User')
+		));
+
+		$agents = $this->Issue->User->find('list', array('conditions' => array(
+			'User.role' => 'agent',
+			'id' => Set::extract('/User/id', $project)
+		)));
+
 		$modifiedUsers = $this->Issue->ModifiedUser->find('list');
 		$projects = $this->Issue->Project->find('list');
 		$this->set(compact('users', 'modifiedUsers', 'projects', 'agents'));
+	}
+
+	public function assignTo($id, $userId) {
+		$this->Issue->id = $id;
+		if (!$this->Issue->exists()){
+			throw new NotFoundException(__('Invalid issue'));
+		}
+		$issue = $this->Issue->read();
+		$issue['Agent']['id'] = $userId;
+		if ($this->Issue->saveAll($issue)){
+			$this->Session->setFlash(__('The issue has been assigned to user #'.$userId));
+		}
+		else {
+			$this->Session->setFlash(__('The issue could not been assigned'));
+		}
+		return $this->redirect(array('action' => 'view', $id));
 	}
 
 /**
@@ -109,4 +140,5 @@ class IssuesController extends AppController {
 			$this->Session->setFlash(__('The issue could not be deleted. Please, try again.'));
 		}
 		return $this->redirect(array('action' => 'index'));
-	}}
+	}
+}
